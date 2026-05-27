@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>좌표평면 위의 점의 좌표 - 실시간 랭킹전</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-database-compat.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      background-color: #f8fafc;
+    }
+    #plane-svg {
+      touch-action: none;
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      cursor: grab;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
+    }
+    #plane-svg:active { cursor: grabbing; }
+    .draggable-point { cursor: pointer; transition: r 0.2s, filter 0.2s; }
+    .draggable-point:hover { r: 1.2; }
+    .coord-input {
+      width: 3rem;
+      text-align: center; font-weight: 700; font-size: 1.25rem;
+      border: 2px solid #cbd5e1; border-radius: 0.5rem; padding: 0.25rem; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .coord-input:focus { border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+    input[type="number"]::-webkit-inner-spin-button, 
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+    .fade-in { animation: fadeIn 0.3s ease-in-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .shake { animation: shake 0.4s ease-in-out; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col">
+
+  <div id="login-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl fade-in">
+      <h2 class="text-2xl font-black text-blue-600 mb-2">좌표평면 마스터</h2>
+      <p class="text-slate-500 text-sm mb-6">자신의 학번과 이름을 입력하고<br>최단 기록에 도전하세요!</p>
+      <input type="text" id="player-name-input" class="w-full text-center text-lg font-bold border-2 border-slate-300 rounded-xl p-3 mb-4 outline-none focus:border-blue-500 transition-colors" placeholder="예: 10101 홍길동" autocomplete="off">
+      <button onclick="startGame()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-transform active:scale-95 shadow-lg">
+        도전 시작!
+      </button>
+    </div>
+  </div>
+
+  <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-wrap justify-between items-center sticky top-0 z-10 shadow-sm">
+    <div class="flex items-center gap-2">
+      <div class="bg-blue-600 text-white rounded-lg p-2 flex items-center justify-center">
