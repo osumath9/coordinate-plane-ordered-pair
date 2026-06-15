@@ -351,9 +351,9 @@
 
     // --- ★ 선생님 전용 관리자 기능 ★ ---
     function openAdmin() {
-      // 보안을 위한 초간단 비밀번호 설정 (기본값: 1234)
+      // 보안을 위한 초간단 비밀번호 설정
       const pwd = prompt("관리자 전용 페이지입니다.\n비밀번호를 입력하세요.");
-      if (pwd === "1234") { // <-- 여기서 선생님 비밀번호를 바꿀 수 있습니다.
+      if (pwd === "94427726") { // <-- 여기서 선생님 비밀번호를 바꿀 수 있습니다.
         document.getElementById('login-modal').classList.add('hidden');
         document.getElementById('admin-panel').classList.remove('hidden');
         loadAdminData(); // 관리자 페이지 열릴 때 데이터 불러오기
